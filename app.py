@@ -12,6 +12,11 @@ import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
+from matplotlib.colors import LinearSegmentedColormap
+
+# my two-tone theme: sky blue for the low end, red for the high end
+SKY_RED_CMAP = LinearSegmentedColormap.from_list("sky_red", ["#E0F2FE", "#0EA5E9", "#E63946"])
+CHART_COLORS = ["#0EA5E9", "#38BDF8", "#7DD3FC", "#F87171", "#EF4444", "#DC2626"]
 
 from sklearn.metrics import (
     accuracy_score, roc_auc_score, precision_score, recall_score,
@@ -28,9 +33,9 @@ MODEL_CATALOG = {
     "Random Forest":       "random_forest.joblib",
 }
 
-st.set_page_config(page_title="Adult Income Model Explorer — Rijas", layout="wide", page_icon="💼")
+st.set_page_config(page_title="Adult Income Model Explorer — Rijas", layout="wide")
 
-st.title("💼 Adult Income Classification — Model Explorer")
+st.title("Adult Income Classification — Model Explorer")
 st.caption("ML Assignment 2 · Rijas · BITS Pilani WILP, M.Tech AIML")
 st.write(
     "I trained 5 classifiers on the UCI Adult Income census dataset to predict "
@@ -68,7 +73,7 @@ def get_comparison_table():
 
 label_encoder = get_label_encoder()
 
-overview_tab, explorer_tab = st.tabs(["📊 Compare all 5 models", "🔍 Explore one model"])
+overview_tab, explorer_tab = st.tabs(["Compare all 5 models", "Explore one model"])
 
 # ---------------- TAB 1: quick comparison across all 5 models ----------------
 with overview_tab:
@@ -76,11 +81,11 @@ with overview_tab:
     st.write("These numbers come straight from training (`model/metrics_comparison.csv`), on a 20% held-out split.")
 
     comparison = get_comparison_table()
-    st.dataframe(comparison.style.highlight_max(axis=0, color="#3b2d6b"))
+    st.dataframe(comparison.style.highlight_max(axis=0, color="#0EA5E9"))
 
     # grouped bar chart — easier to eyeball than a plain table
     fig, ax = plt.subplots(figsize=(10, 4.5))
-    comparison.plot(kind="bar", ax=ax, colormap="cool")
+    comparison.plot(kind="bar", ax=ax, color=CHART_COLORS)
     ax.set_ylabel("Score")
     ax.set_xlabel("")
     ax.set_title("Metric comparison across models")
@@ -141,7 +146,7 @@ with explorer_tab:
         cm = confusion_matrix(true_labels, predicted_labels)
         fig, ax = plt.subplots(figsize=(4.5, 4))
         sns.heatmap(
-            cm, annot=True, fmt="d", cmap="mako",
+            cm, annot=True, fmt="d", cmap=SKY_RED_CMAP,
             xticklabels=label_encoder.classes_, yticklabels=label_encoder.classes_, ax=ax,
         )
         ax.set_xlabel("Predicted")
