@@ -1,7 +1,3 @@
-# train_models.py
-# Trains 5 classifiers on the Adult Income dataset,
-# computes 6 metrics each, and saves everything for the Streamlit app.
-
 import os
 import joblib
 import pandas as pd
@@ -36,30 +32,26 @@ os.makedirs(MODEL_DIR, exist_ok=True)
 data = pd.read_csv(DATA_FILE)
 print("Loaded:", data.shape)
 
-# this dataset marks missing values with '?', turn them into real blanks
 data = data.replace("?", np.nan)
 print("Missing values after cleaning:\n", data.isna().sum()[data.isna().sum() > 0])
 
 X       = data.drop(columns=[TARGET])
 y_text  = data[TARGET]
 
-# turn '<=50K'/'>50K' into 0/1 numbers
 encoder = LabelEncoder()
 y       = encoder.fit_transform(y_text)
-print("Target classes:", list(encoder.classes_))   # e.g. ['<=50K', '>50K']
+print("Target classes:", list(encoder.classes_))
 
 numeric_cols     = X.select_dtypes(include=["int64", "float64", "int32", "float32"]).columns.tolist()
 categorical_cols = X.select_dtypes(include=["object", "string", "category"]).columns.tolist()
 print("Numeric columns:", numeric_cols)
 print("Categorical columns:", categorical_cols)
 
-# numbers: fill blanks with median, then scale to a common range
 numeric_steps = Pipeline([
     ("fill", SimpleImputer(strategy="median")),
     ("scale", StandardScaler()),
 ])
 
-# text: fill blanks with most common value, then one-hot encode
 categorical_steps = Pipeline([
     ("fill", SimpleImputer(strategy="most_frequent")),
     ("onehot", OneHotEncoder(handle_unknown="ignore")),
@@ -75,7 +67,6 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 print("Train size:", X_train.shape, "| Test size:", X_test.shape)
 
-# the 5 models required by the assignment
 model_zoo = {
     "Logistic Regression": LogisticRegression(max_iter=1000),
     "Decision Tree":       DecisionTreeClassifier(random_state=SEED),
@@ -84,10 +75,9 @@ model_zoo = {
     "Random Forest":       RandomForestClassifier(random_state=SEED),
 }
 
-# all 6 metrics the assignment asks for
 def score_model(fitted, X_test, y_test):
     y_pred  = fitted.predict(X_test)
-    y_proba = fitted.predict_proba(X_test)[:, 1]   # prob of the '>50K' class
+    y_proba = fitted.predict_proba(X_test)[:, 1]
 
     return {
         "Accuracy":  accuracy_score(y_test, y_pred),
@@ -106,12 +96,9 @@ for name, clf in model_zoo.items():
     all_results[name] = score_model(pipe, X_test, y_test)
 
     save_name = os.path.join(MODEL_DIR, name.lower().replace(" ", "_") + ".joblib")
-    # compress=3: Random Forest / kNN pickle to 100MB+ uncompressed, which
-    # GitHub's push limit rejects outright. Compression is lossless.
     joblib.dump(pipe, save_name, compress=3)
     print("Saved", save_name)
 
-# save the label encoder too (app needs it to read class names)
 joblib.dump(encoder, os.path.join(MODEL_DIR, "label_encoder.joblib"), compress=3)
 
 table = pd.DataFrame(all_results).T.round(4)
@@ -119,7 +106,6 @@ print("\n===== COMPARISON TABLE =====")
 print(table)
 table.to_csv(os.path.join(MODEL_DIR, "metrics_comparison.csv"))
 
-# save the held-out test set separately so the Streamlit app has something to upload
 test_out = X_test.copy()
 test_out[TARGET] = encoder.inverse_transform(y_test)
 test_data_path = os.path.join(BASE_DIR, "test_data.csv")
