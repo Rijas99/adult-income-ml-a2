@@ -75,7 +75,7 @@ label_encoder = get_label_encoder()
 
 overview_tab, explorer_tab = st.tabs(["Compare all 5 models", "Explore one model"])
 
-# ---------------- TAB 1: quick comparison across all 5 models ----------------
+# first tab: quick comparison across all 5 models
 with overview_tab:
     st.subheader("How the 5 models stack up")
     st.write("These numbers come straight from training (`model/metrics_comparison.csv`), on a 20% held-out split.")
@@ -96,7 +96,7 @@ with overview_tab:
     best_by_mcc = comparison["MCC"].idxmax()
     st.info(f"By MCC (the most balanced metric for an imbalanced dataset like this one), **{best_by_mcc}** comes out on top.")
 
-# ---------------- TAB 2: pick a model, upload data, inspect it ----------------
+# second tab: pick a model, upload data, inspect it
 with explorer_tab:
     st.subheader("Try a model on your own test data")
     uploaded_csv = st.file_uploader("Upload test_data.csv", type="csv")
