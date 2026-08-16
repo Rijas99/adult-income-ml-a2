@@ -14,9 +14,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.colors import LinearSegmentedColormap
 
-# my two-tone theme: sky blue for the low end, red for the high end
-SKY_RED_CMAP = LinearSegmentedColormap.from_list("sky_red", ["#E0F2FE", "#0EA5E9", "#E63946"])
-CHART_COLORS = ["#0EA5E9", "#38BDF8", "#7DD3FC", "#F87171", "#EF4444", "#DC2626"]
+# my theme: light lavender for the low end, deep purple for the high end
+PURPLE_CMAP = LinearSegmentedColormap.from_list("purple_scale", ["#EDE9FE", "#A78BFA", "#5B21B6"])
+CHART_COLORS = ["#C4B5FD", "#A78BFA", "#8B5CF6", "#7C3AED", "#6D28D9", "#5B21B6"]
 
 from sklearn.metrics import (
     accuracy_score, roc_auc_score, precision_score, recall_score,
@@ -81,7 +81,7 @@ with overview_tab:
     st.write("These numbers come straight from training (`model/metrics_comparison.csv`), on a 20% held-out split.")
 
     comparison = get_comparison_table()
-    st.dataframe(comparison.style.highlight_max(axis=0, color="#0EA5E9"))
+    st.dataframe(comparison.style.highlight_max(axis=0, color="#8B5CF6"))
 
     # grouped bar chart — easier to eyeball than a plain table
     fig, ax = plt.subplots(figsize=(10, 4.5))
@@ -146,7 +146,7 @@ with explorer_tab:
         cm = confusion_matrix(true_labels, predicted_labels)
         fig, ax = plt.subplots(figsize=(4.5, 4))
         sns.heatmap(
-            cm, annot=True, fmt="d", cmap=SKY_RED_CMAP,
+            cm, annot=True, fmt="d", cmap=PURPLE_CMAP,
             xticklabels=label_encoder.classes_, yticklabels=label_encoder.classes_, ax=ax,
         )
         ax.set_xlabel("Predicted")
